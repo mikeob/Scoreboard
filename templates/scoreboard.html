@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block content %}
+<table border="0">
+	<tr>
+		<th>Rank</th> 
+		<th>Name</th>
+		<th>Solved</th>
+		<th>Time</th>
+		{% for problem in pset %}
+			<th>problem.name</th>
+		{% endfor %}
+	</tr>
+	{% for team in teams %}
+	<tr>
+		<th>rank</th>
+		<th>team.name</th>
+		<th>team.solved</th>
+		<th>team.time</th>
+		{% for problem in team.pset %}
+			<th>x</th>
+		{% endfor %}
+	</tr>
+	{% endfor %}
+</table>
+{% block content %}
