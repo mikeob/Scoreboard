@@ -1,6 +1,6 @@
 import os
 import sqlite3
-import progteam
+from progteam import *
 from flask import Flask, request, session, g, redirect, url_for, abort, \
 	render_template, flash
 
@@ -17,6 +17,7 @@ app.config.update(dict(
 	))
 
 app.config.from_envvar('FLASKR_SETTINGS', silent=True)
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 60
 
 
 
@@ -63,7 +64,7 @@ def add_entry():
 		abort(401)
 	db = get_db()
 	db.execute('insert into entries (title, text) values (?, ?)',
-		[request.form['title'], request.form['text']])
+		[request.form['title'], request.form['text']])	
 	db.commit()
 	flash('New entry was successfully posted')
 	return redirect(url_for('show_entries'))
@@ -101,16 +102,58 @@ def upload_file():
 
 	return render_template('upload.html')
 
-@app.rout('/scoreboard', methods=['GET'])
-def scoreboard():
+def make_problems(num):
+	problems = []
+	for count in xrange(num):
+		name = "Problem " + `count`
+		p = Problem(name, "url")
+		problems.append(p)
+	return problems
 
-	# Generate teams & problems
-	teams = None
-	problems = None
+teams = []
+problems = []
+
+@app.route('/scoreboard', methods=['GET'])
+def new_scoreboard():
+	global teams
+	global problems
+
+	if len(teams) == 0:
+		print 'Making teams/problems!'
+
+		# Generate teams & problems
+		problems = make_problems(8)
+
+		team1 = Team("Team 1", problems)
+		team1.solved_count = 4
+		team1.time = 100
+		team1.solved[0] = 2
+		team2 = Team("Team 2", problems)
+		team2.solved_count = 4
+		team2.time = 99
+
+		teams.append(team1)
+		teams.append(team2)
+
+
+
+	# Sort the teams first by problems solved, then by time
+	teams.sort(key=lambda x: (-x.solved_count, x.time))
+
 
 	return render_template("scoreboard.html",
-		teams,
-		problems)
+		teams = teams,
+		problems = problems)
+
+@app.route('/scoreboard/<int:problem_id>/<int:solved>')#, methods=['POST'])
+def mark_attempt(problem_id, solved):
+	print 'Received!'
+
+	teams[0].tries[problem_id] += 1
+	if solved == 1:
+		teams[0].solved[problem_id] = 100
+
+	return redirect(url_for('new_scoreboard'))
 
 
 if __name__ == '__main__':

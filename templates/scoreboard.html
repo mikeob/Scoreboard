@@ -1,25 +1,36 @@
 {% extends "base.html" %}
 {% block content %}
-<table border="0">
+<table class="table table-striped">
+	<thead>
 	<tr>
 		<th>Rank</th> 
 		<th>Name</th>
 		<th>Solved</th>
 		<th>Time</th>
-		{% for problem in pset %}
-			<th>problem.name</th>
+		{% for problem in problems %}
+			<th>{{ problem.name }}</th>
 		{% endfor %}
 	</tr>
+	</thead>
+	<tbody>
+
+	<!-- section about teams -->
 	{% for team in teams %}
 	<tr>
-		<th>rank</th>
-		<th>team.name</th>
-		<th>team.solved</th>
-		<th>team.time</th>
-		{% for problem in team.pset %}
-			<th>x</th>
+		<th>{{ loop.index }}</th>
+		<th>{{ team.name }}</th>
+		<th>{{ team.solved_count }}</th>
+		<th>{{ team.time }}</th>
+		{% for val in team.solved %}
+			 {% if val == -1 %}
+		 		<!-- Include button here! -->
+		 		<th> Not solved. </th>
+			 {% else %}
+				 <th> {{ team.tries[loop.index0] }}/{{ team.solved[loop.index0] }} </th>
+			 {% endif %}
 		{% endfor %}
 	</tr>
 	{% endfor %}
+	</tbody>
 </table>
-{% block content %}
+{% endblock %}

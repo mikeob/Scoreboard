@@ -8,11 +8,13 @@
 	times for solving them.
 '''
 class Team:
-	def __init__(name, problems):
+	def __init__(self, name, problems):
 		self.name = name	 # Name of the team
 		self.problems = problems # Array of problem names
-		self.solved = [-1] * problems.len()  # Time problem solved. -1 if not solved.
-		self.tries = [0] * problems.len()
+		self.solved_count = 0
+		self.time = 0
+		self.solved = [-1] * len(problems)  # Time problem solved. -1 if not solved.
+		self.tries = [0] * len(problems)
 
 
 
@@ -23,7 +25,7 @@ class Team:
 	as well as other meta-data
 '''
 class Problem:
-	def __init__(name, url):
+	def __init__(self, name, url):
 		self.name = name
 		self.url = url
 
