@@ -7,10 +7,12 @@ var Stopwatch = function(elem, options) {
       offset,
       clock,
       interval;
-  
+
+
   // default options
   options = options || {};
-  options.delay = options.delay || 1;
+  //options.delay = options.delay || 1;
+  options.delay = 1000
  
   // append elements     
   elem.appendChild(timer);
@@ -65,7 +67,19 @@ var Stopwatch = function(elem, options) {
   }
   
   function render() {
-    timer.innerHTML = clock/1000; 
+
+    var seconds = Math.round(clock/1000);
+    var hours = Math.floor(seconds / 3600);
+    seconds = seconds % 3600;
+    var minutes = Math.floor(seconds / 60);
+    seconds = seconds % 60;
+
+    var str = "".concat(hours.toString(), ":", minutes.toString(), ":", seconds.toString());
+
+
+    timer.innerHTML = str;
+
+
   }
   
   function delta() {

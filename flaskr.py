@@ -1,3 +1,4 @@
+from datetime import datetime
 import os
 import sqlite3
 from progteam import *
@@ -112,46 +113,92 @@ def make_problems(num):
 
 teams = []
 problems = []
+start_time = None
+
+@app.route('/scoreboard/start')#, methods=['POST'])
+def begin_competition():
+	global start_time
+	print 'Competition begun!'
+	start_time = datetime.now()
+	return redirect(url_for('new_scoreboard'))
+
+''' Returns the current time in minutes '''
+def get_time():
+	global start_time
+	if start_time == None:
+		return None
+	delta = datetime.now() - start_time
+	return delta
 
 @app.route('/scoreboard', methods=['GET'])
 def new_scoreboard():
 	global teams
 	global problems
 
+	"""
 	if len(teams) == 0:
 		print 'Making teams/problems!'
 
-		# Generate teams & problems
-		problems = make_problems(8)
+		#TODO Remove once we've added 
+		# add_team() and add_problem()
+		problems = make_problems(10)
 
 		team1 = Team("Team 1", problems)
-		team1.solved_count = 4
-		team1.time = 100
-		team1.solved[0] = 2
-		team2 = Team("Team 2", problems)
-		team2.solved_count = 4
-		team2.time = 99
+		team1.solved_count = 0
+		team1.time = 0
 
 		teams.append(team1)
-		teams.append(team2)
-
-
+		"""
 
 	# Sort the teams first by problems solved, then by time
-	teams.sort(key=lambda x: (-x.solved_count, x.time))
+	sortedOrder = sorted(teams, key=lambda x: (-x.solved_count, x.time))
+	timestring = str(get_time()).split(".")[0]
 
 
 	return render_template("scoreboard.html",
-		teams = teams,
-		problems = problems)
+		teams = sortedOrder,
+		problems = problems,
+		time = timestring)
 
-@app.route('/scoreboard/<int:problem_id>/<int:solved>')#, methods=['POST'])
-def mark_attempt(problem_id, solved):
-	print 'Received!'
+@app.route('/add_team', methods=['POST'])
+def add_team():
+	teamname = request.form['teamname']
+	teams.append(Team(teamname, problems))
+	teams[len(teams)-1].index = len(teams)-1
+	return redirect(url_for('new_scoreboard'))
 
-	teams[0].tries[problem_id] += 1
+
+
+@app.route('/add_problem', methods=['POST'])
+def add_problem():
+	problem = request.form['problemname']
+	problems.append(Problem(problem, "fakeurl"))
+	for team in teams:
+		team.add_problem()
+	return redirect(url_for('new_scoreboard'))
+
+
+@app.route('/scoreboard/<int:problem_id>/<int:solved>/<teamidx>')#, methods=['POST'])
+def mark_attempt(problem_id, solved, teamidx):
+	global start_time
+
+	# If time not started yet...
+	if start_time == None:
+		flash('Need to start the timer before making attempts')		
+		return redirect(url_for('new_scoreboard'))
+	if len(teams) == 0:
+		flash('No teams currently in the competition')
+		return redirect(url_for('new_scoreboard'))
+
+	# Select which team to change
+	team = teams[int(teamidx)]
+	team.tries[problem_id] += 1
+
 	if solved == 1:
-		teams[0].solved[problem_id] = 100
+		time = int(get_time().seconds/60)
+		team.solved[problem_id] = time
+		team.time += time + 20*(team.tries[problem_id]-1)
+		team.solved_count += 1
 
 	return redirect(url_for('new_scoreboard'))
 

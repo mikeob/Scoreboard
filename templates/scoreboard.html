@@ -1,36 +1,109 @@
 {% extends "base.html" %}
 {% block content %}
-<table class="table table-striped">
-	<thead>
-	<tr>
-		<th>Rank</th> 
-		<th>Name</th>
-		<th>Solved</th>
-		<th>Time</th>
-		{% for problem in problems %}
-			<th>{{ problem.name }}</th>
-		{% endfor %}
-	</tr>
-	</thead>
-	<tbody>
 
-	<!-- section about teams -->
-	{% for team in teams %}
-	<tr>
-		<th>{{ loop.index }}</th>
-		<th>{{ team.name }}</th>
-		<th>{{ team.solved_count }}</th>
-		<th>{{ team.time }}</th>
-		{% for val in team.solved %}
-			 {% if val == -1 %}
-		 		<!-- Include button here! -->
-		 		<th> Not solved. </th>
-			 {% else %}
-				 <th> {{ team.tries[loop.index0] }}/{{ team.solved[loop.index0] }} </th>
-			 {% endif %}
-		{% endfor %}
-	</tr>
-	{% endfor %}
-	</tbody>
-</table>
+<div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+	<div class="container-fluid">
+		<div class="navbar-header">
+
+			{% if time == "None" %}
+		 		<a type="button" class="btn btn-default btn-success btn-xs" data-toggle="confirmation-singleton" 
+				 		href="{{ url_for('begin_competition') }}">
+				 		Start Competition
+				 		<!--<span class="glyphicon glyphicon-ok"></span>-->
+				 		</a>
+			{% else %}
+				<font color="white">{{ time }}</font>
+			{% endif %}
+		</div>
+	</div>
+
+</div>
+
+<div class="container-fluid">
+	<div class="row">
+
+		<div class="col-sm-3 col-md-2 sidebar">
+			<ul class="nav nav-sidebar">
+
+				<form role="form" action="{{ url_for('add_team') }}" method="post">
+					<div class="form-group">
+						<label for="teamNameInput">Team Name</label>
+						<input type="text" class="form-control" id="teamNameInput" placeholder="Team Name" name="teamname">
+					</div>
+					<button type="submit" class="btn btn-default">Submit</button>
+				</form>
+			</ul>
+			<ul class="nav nav-sidebar">
+				<form role="form" action="{{ url_for('add_problem') }}" method="post">
+					<div class="form-group">
+						<label for="problemNameInput">Add a Problem</label>
+						<input type="text" class="form-control" id="problemNameInput" placeholder="Problem Name" name="problemname">
+					</div>
+					<button type="submit" class="btn btn-default">Submit</button>
+				</form>
+
+			</ul>
+		</div>
+
+		<div class="col-sm-9 col-sm-offset-2 col-md-10 col-mmd-offset-2 main">
+
+		{% with messages = get_flashed_messages() %}
+		  {% if messages %}
+		    {% for message in messages %}
+		  	<div class="alert alert-warning">
+		      {{ message }}
+		    </div>
+		    {% endfor %}
+		  {% endif %}
+		{% endwith %}
+
+			<table class="table table-striped">
+				<thead>
+				<tr>
+					<th>Rank</th> 
+					<th>Name</th>
+					<th>Solved</th>
+					<th>Time</th>
+					{% for problem in problems %}
+						<th>{{ problem.name }}</th>
+					{% endfor %}
+				</tr>
+				</thead>
+				<tbody>
+
+				<!-- section about teams -->
+				{% for team in teams %}
+				<tr>
+					<th>{{ loop.index }}</th>
+					<th>{{ team.name }}</th>
+					<th>{{ team.solved_count }}</th>
+					<th>{{ team.time }}</th>
+					{% for val in team.solved %}
+						 {% if val == -1 %}
+					 		<!-- Include button here! -->
+
+					 		<th> 
+						 		<a type="button" class="btn btn-default btn-success btn-xs" data-toggle="confirmation-singleton" 
+						 		href="{{ url_for('mark_attempt', problem_id=loop.index0, solved=1, teamidx=team.index) }}"><span class="glyphicon glyphicon-ok"></span></a>
+
+						 		<a type="button" class="btn btn-default btn-danger btn-xs" data-toggle="confirmation-singleton" 
+						 		href="{{ url_for('mark_attempt', problem_id=loop.index0, solved=0, teamidx=team.index) }}"><span class="glyphicon glyphicon-remove"></span></a>
+
+					 		</th>
+						 {% else %}
+							 <th> {{ team.tries[loop.index0] }}/{{ team.solved[loop.index0] }} </th>
+						 {% endif %}
+					{% endfor %}
+				</tr>
+				{% endfor %}
+				</tbody>
+			</table>
+		</div>
+
+
+
+
+	</div>
+</div>
+
 {% endblock %}

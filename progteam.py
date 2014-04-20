@@ -8,6 +8,7 @@
 	times for solving them.
 '''
 class Team:
+	index = 0
 	def __init__(self, name, problems):
 		self.name = name	 # Name of the team
 		self.problems = problems # Array of problem names
@@ -15,6 +16,14 @@ class Team:
 		self.time = 0
 		self.solved = [-1] * len(problems)  # Time problem solved. -1 if not solved.
 		self.tries = [0] * len(problems)
+
+		# Get an index
+		self.index = Team.index
+		Team.index += 1
+
+	def add_problem(self):
+		self.solved.append(-1)
+		self.tries.append(0)
 
 
 
